@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>TinyApp</title>
+</head>
+<body>
+  <header>
+  <% include ./partials/_header %>
+  </header>
+
+  <table>
+  <% Object.keys(urlDatabase).forEach(function(shortURL) { %>
+    <tr>
+      <td> <%= shortURL %> </td>
+      <td> <%= urlDatabase[shortURL] %> </td>
+      <td> <form method="POST" action="/urls/<%= shortURL %>/delete"> <button> delete </button> </form>
+      </td>
+    </tr>
+  <% }) %>
+  </table>
+
+
+  <a href="https://www.google.ca/?gfe_rd=cr&ei=i_SBWeO7Mcne8AeLlIHABQ"> dead link for now </a>
+
+</body>
+</html>
