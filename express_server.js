@@ -18,6 +18,28 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+var users = {
+  "hannah": {
+    id: "userRandomID",
+    email: "hannah@hannah.com",
+    password: "hannah"
+  },
+ "grace": {
+    id: "user2RandomID",
+    email: "grace@grace.com",
+    password: "grace"
+  },
+  "jenna": {
+    id: "user3RandomID",
+    email: "jenna@jenna.com",
+    password: "jenna"
+  },
+  "lisa": {
+    id: "user3RandomID",
+    email: "lisa@lisa.com",
+    password: "lisa"
+  }
+}
 
 
 
@@ -122,6 +144,26 @@ app.post("/logout", (req, res) => {
   res.clearCookie("username", {path: "/"});
   res.redirect("/urls");
 })
+
+
+//user registration page
+app.get("/register", (req, res) => {
+  let userLoggedIn = {
+    username: req.cookies["username"]
+  };
+  res.render("urls_register", {
+    userLoggedIn: userLoggedIn
+  })
+})
+
+app.post("/register", (req, res) => {
+  console.log(req.body);
+  res.redirect("/urls");
+})
+
+
+
+
 
 
 //redirect short URL to actual, long URL site
