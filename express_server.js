@@ -31,6 +31,10 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+
+
+
+
 //show the list of URLs with their shortened forms
 app.get("/urls", (req, res) => {
   res.render("urls_index", {
@@ -68,14 +72,27 @@ app.post("/urls", (req, res) => {
 
 
 //delete URLs
-app.post("/urls/:id/delete", (req, res) => {
-  var selectedShortURL = req.params.id;
+app.post("/urls/:shortURL/delete", (req, res) => {
+  var selectedShortURL = req.params.shortURL;
   // testing whhat selectedShortURL is returning is
   // console.log("selectedShortURL: ", selectedShortURL);
   delete urlDatabase[selectedShortURL];
 
   res.redirect("/urls")
 })
+
+
+//update URLs
+app.post("/urls/:shortURL/update", (req, res) => {
+  var shortURL = req.params.shortURL;
+  var newlongURL = req.body["newLongURL"]
+  // testing new URL inputs
+  // console.log("this should be hello", newlongURL);
+  // console.log("this should be lighthouse: ", urlDatabase[shortURL]);
+  urlDatabase[shortURL] = newlongURL;
+  res.redirect("/urls")
+})
+
 
 
 
