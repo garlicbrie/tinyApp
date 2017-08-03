@@ -5,7 +5,14 @@
 </head>
 <body>
   <header>
-  this is a header
-  </header>
+  <% if (!userLoggedIn.username) { %>
+  <form method="POST" action="/login"> user name=  <input type="text" name="username"><input type="submit" value="sign in"></form>
+</header>
+  <% } else{ %>
+  <h1> Logged In: <%= userLoggedIn.username %> <form method="POST" action="/logout"><button> logout </button></form> </h1>
+  <% } %>
 </body>
 </html>
+
+
+

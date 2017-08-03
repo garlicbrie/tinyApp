@@ -8,6 +8,10 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+//accessing cookie parser middleware and allowing to save cookie
+var cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
 //database
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -37,8 +41,13 @@ app.get("/urls.json", (req, res) => {
 
 //show the list of URLs with their shortened forms
 app.get("/urls", (req, res) => {
+  let userLoggedIn = {
+    username: req.cookies["username"]
+  }
+  // console.log(userLoggedIn.username)
   res.render("urls_index", {
-    urlDatabase: urlDatabase
+    urlDatabase: urlDatabase,
+    userLoggedIn: userLoggedIn
   });
 });
 
@@ -57,7 +66,12 @@ function generateRandomString() {
 
 //show /urls/new page
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let userLoggedIn = {
+    username: req.cookies["username"]
+  }
+  res.render("urls_new", {
+    userLoggedIn: userLoggedIn
+  });
 });
 
 
@@ -78,7 +92,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   // console.log("selectedShortURL: ", selectedShortURL);
   delete urlDatabase[selectedShortURL];
 
-  res.redirect("/urls")
+  res.redirect("/urls");
 })
 
 
@@ -90,30 +104,51 @@ app.post("/urls/:shortURL/update", (req, res) => {
   // console.log("this should be hello", newlongURL);
   // console.log("this should be lighthouse: ", urlDatabase[shortURL]);
   urlDatabase[shortURL] = newlongURL;
-  res.redirect("/urls")
+  res.redirect("/urls");
 })
 
 
+//handling login submissions
+app.post("/login", (req, res) => {
+  var userNameSubmitted = req.body.username;
+  // testing the submitted username:
+  // console.log("username should be hannah: ", userNameSubmitted)
+  res.cookie('username', userNameSubmitted);
+  res.redirect("/urls");
+})
 
-
+// when user logs out, redirect to /urls
+app.post("/logout", (req, res) => {
+  res.clearCookie("username", {path: "/"});
+  res.redirect("/urls");
+})
 
 
 //redirect short URL to actual, long URL site
 app.get("/u/:shortURL", (req, res) => {
+  let userLoggedIn = {
+    username: req.cookies["username"]
+  }
   var shortURL = req.params.shortURL;
   let longURL  = urlDatabase[shortURL]
-  res.redirect(longURL);
+  res.redirect(longURL, {
+    userLoggedIn: userLoggedIn
+  });
 });
 
 
 
 //show the individual URL (individual page)
 app.get("/urls/:id", (req, res) => {
+  let userLoggedIn = {
+    username: req.cookies["username"]
+  }
   var shortURL = req.params.id;
   var longURL = urlDatabase[shortURL];
   res.render("urls_show", {
     shortURL: shortURL,
-    longURL: longURL
+    longURL: longURL,
+    userLoggedIn: userLoggedIn
   });
 });
 
@@ -121,7 +156,7 @@ app.get("/urls/:id", (req, res) => {
 
 //server console msg
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`tinyApp listening on port ${PORT}!`);
 });
 
 
