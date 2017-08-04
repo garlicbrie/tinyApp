@@ -14,8 +14,12 @@ app.use(cookieParser());
 
 //database
 var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {"longURL": "http://www.lighthouselabs.ca",
+             "user_ID": "hannah"},
+  "9sm5xK": {"longURL": "http://www.google.com",
+             "user_ID": "hannah"},
+  "ck20Ls": {"longURL": "https://web-compass.lighthouselabs.ca/days/w2d4/activities/489",
+             "user_ID": "grace"}
 };
 
 var users = {
@@ -45,7 +49,7 @@ var users = {
 
 //handling get request
 app.get("/", (req, res) => {
-  res.end("Hello!");
+  res.send("<html><body>Welcome to tinyApp! <a href='/urls'> click here to view your urls </a></body></html>\n");
 });
 
 app.get("/hello", (req, res) => {
@@ -64,7 +68,14 @@ app.get("/urls.json", (req, res) => {
 //show the list of URLs with their shortened forms
 app.get("/urls", (req, res) => {
   var userCookie = req.cookies["user_ID"];
-  console.log("getting userid: ", users[userCookie]);
+  if (!userCookie) {
+    res.status(400).send("Please log in first to view your shortend URLs!")
+    return
+  }
+  function urlsForUser() {
+
+  }
+  // console.log("getting userCookie: ", userCookie);
   let templateVars = {
     user: users[userCookie],
     urlDatabase: urlDatabase
@@ -93,6 +104,10 @@ app.get("/urls/new", (req, res) => {
   var userCookie = req.cookies["user_ID"];
   let templateVars = {
     user: users[userCookie]
+  };
+  if (!userCookie) {
+    res.redirect("/login")
+    return
   }
   res.render("urls_new", templateVars);
 });
@@ -153,20 +168,17 @@ app.post("/login", (req, res) => {
     return
   }
   for (var user in users) {
-    if (users[user].email === userEmail) {
-      if (users[user].password === userPassword) {
+    if (users[user].email === userEmail && users[user].password === userPassword) {
         var ID = users[user].id;
         res.cookie("user_ID", ID)
         res.redirect("/")
+        return
       } else {
         res.status(400).send("Either your email address or password seems to be wrong! Try again.")
         return
       }
     }
-  }
-   res.status(400).send("Either your email address or password seems to be wrong! Try again.")
-   return
-})
+  })
 
 // when user logs out, redirect to /urls
 app.post("/logout", (req, res) => {
