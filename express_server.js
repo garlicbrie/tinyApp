@@ -20,22 +20,22 @@ var urlDatabase = {
 
 var users = {
   "hannah": {
-    id: "userRandomID",
+    id: "hannah",
     email: "hannah@hannah.com",
     password: "hannah"
   },
  "grace": {
-    id: "user2RandomID",
+    id: "grace",
     email: "grace@grace.com",
     password: "grace"
   },
   "jenna": {
-    id: "user3RandomID",
+    id: "jenna",
     email: "jenna@jenna.com",
     password: "jenna"
   },
   "lisa": {
-    id: "user3RandomID",
+    id: "lisa",
     email: "lisa@lisa.com",
     password: "lisa"
   }
@@ -64,7 +64,8 @@ app.get("/urls.json", (req, res) => {
 //show the list of URLs with their shortened forms
 app.get("/urls", (req, res) => {
   let userLoggedIn = {
-    username: req.cookies["username"]
+    username: req.cookies["username"],
+    urlDatabase: urlDatabase
   }
   // console.log(userLoggedIn.username)
   res.render("urls_index", {
@@ -72,6 +73,21 @@ app.get("/urls", (req, res) => {
     userLoggedIn: userLoggedIn
   });
 });
+
+// //show the list of URLs with their shortened forms
+// app.get("/THIS_IS_NOT_REAL/urls", (req, res) => {
+//   var user = {
+//     name: "idiot",
+//     profile_pic: "http://pics.com/mypic.jpg"
+//   }
+//   // TODO: set user to the right user, somehow
+
+//   // console.log(userLoggedIn.username)
+//   res.render("urls_index", {
+//     urlDatabase: urlDatabase,
+//     userLoggedIn: user
+//   });
+// });
 
 
 //Generate a Random ShortURL
@@ -157,7 +173,19 @@ app.get("/register", (req, res) => {
 })
 
 app.post("/register", (req, res) => {
-  console.log(req.body);
+  const newID = generateRandomString();
+  const newEmail = req.body.email;
+  const newPassword = req.body.password;
+  var newIDSet = {};
+  newIDSet.id = newID;
+  newIDSet.email = newEmail;
+  newIDSet.password = newPassword;
+  users[newID] = newIDSet;
+  // testing the users database
+  // console.log(users);
+  res.cookie("user_ID", newID)
+  // testing newEmail - getting back the string
+  // console.log("newIDSet should return an object", newIDSet);
   res.redirect("/urls");
 })
 

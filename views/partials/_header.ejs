@@ -1,18 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>TinyApp</title>
-</head>
-<body>
-  <header>
+
+<header>
   <% if (!userLoggedIn.username) { %>
-  <form method="POST" action="/login"> user name=  <input type="text" name="username"><input type="submit" value="sign in"></form>
-</header>
+    <form method="POST" action="/login">
+      user name =
+      <input type="text" name="username">
+      <input type="submit" value="sign in">
+    </form>
   <% } else{ %>
-  <h1> Logged In: <%= userLoggedIn.username %> <form method="POST" action="/logout"><button> logout </button></form> </h1>
+    <h1> Logged In: <%= userLoggedIn.username %>
+    <form method="POST" action="/logout">
+      <button> logout </button>
+    </form> </h1>
   <% } %>
-</body>
-</html>
-
-
-
+</header>
