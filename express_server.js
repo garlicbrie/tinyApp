@@ -68,17 +68,31 @@ app.get("/urls.json", (req, res) => {
 //show the list of URLs with their shortened forms
 app.get("/urls", (req, res) => {
   var userCookie = req.cookies["user_ID"];
+
+  //filtering function that returns a list of urls (object) for specific id
+  function urlsForUser(id) {
+    var urls = {};
+    var userSpecificURLs;
+    for (var shortURL in urlDatabase) {
+      if (urlDatabase[shortURL]["user_ID"] === id) {
+        urls[shortURL] = urlDatabase[shortURL]
+      }
+    }
+    return urls
+  }
+
   if (!userCookie) {
     res.status(400).send("Please log in first to view your shortend URLs!")
     return
+  } else {
+    userSpecificURLs = urlsForUser(userCookie);
   }
-  function urlsForUser() {
 
-  }
   // console.log("getting userCookie: ", userCookie);
   let templateVars = {
     user: users[userCookie],
-    urlDatabase: urlDatabase
+    urlDatabase: urlDatabase,
+    userSpecificURLs: userSpecificURLs
   }
   // console.log(userLoggedIn.username)
   res.render("urls_index", templateVars);
@@ -161,23 +175,22 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   var userEmail = req.body.email;
   var userPassword = req.body.password;
-  // console.log("useremail: ", userEmailSubmitted);
-  // console.log("password: ", userPasswordSubmitted)
+  // console.log("useremail: ", userEmail);
+  // console.log("password: ", userPassword);
   if (!userEmail || !userPassword) {
     res.status(400).send("Please enter email and password!")
     return
   }
   for (var user in users) {
+    // console.log(users[user]);
     if (users[user].email === userEmail && users[user].password === userPassword) {
         var ID = users[user].id;
         res.cookie("user_ID", ID)
         res.redirect("/")
         return
-      } else {
-        res.status(400).send("Either your email address or password seems to be wrong! Try again.")
-        return
-      }
     }
+  }
+  res.status(400).send("Either your email address or password seems to be wrong! Try again.");
   })
 
 // when user logs out, redirect to /urls

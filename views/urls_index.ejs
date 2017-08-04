@@ -9,10 +9,10 @@
   </header>
 
   <table>
-  <% Object.keys(urlDatabase).forEach(function(shortURL) { %>
+  <% Object.keys(userSpecificURLs).forEach(function(shortURL) { %>
     <tr>
       <td> <%= shortURL %> </td>
-      <td> <%= urlDatabase[shortURL]["longURL"] %> </td>
+      <td> <%= userSpecificURLs[shortURL]["longURL"] %> </td>
       <td> <form method="POST" action="/urls/<%= shortURL %>/delete"> <button> delete </button> </form>
       </td>
     </tr>
