@@ -150,6 +150,7 @@ app.post("/login", (req, res) => {
   // console.log("password: ", userPasswordSubmitted)
   if (!userEmail || !userPassword) {
     res.status(400).send("Please enter email and password!")
+    return
   }
   for (var user in users) {
     if (users[user].email === userEmail) {
@@ -159,10 +160,12 @@ app.post("/login", (req, res) => {
         res.redirect("/")
       } else {
         res.status(400).send("Either your email address or password seems to be wrong! Try again.")
+        return
       }
     }
   }
    res.status(400).send("Either your email address or password seems to be wrong! Try again.")
+   return
 })
 
 // when user logs out, redirect to /urls
@@ -192,10 +195,12 @@ app.post("/register", (req, res) => {
   };
   if (!newEmail || !newPassword) {
     res.status(400).send("Please enter your email address and password!")
+    return
   }
   for (const user in users) {
     if (newEmail === users[user].email) {
       res.status(400).send("This email already exists! Please log in.")
+      return
     }
   }
   // testing the users database
