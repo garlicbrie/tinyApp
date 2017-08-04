@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+  <header>
+  <% include ./partials/_header %>
+  </header>
+  <h1> Log In Now </h1>
+  <% if (!user) { %>
+    <form method="POST" action="/login">
+      Email Address =
+      <input type="email" name="email">
+      Password =
+      <input type="password" name="password">
+      <input type="submit" value="login">
+    </form>
+  <% } else{ %>
+    <h1> Logged In: <%= user["id"] %>
+    <form method="POST" action="/logout">
+      <button> logout </button>
+    </form> </h1>
+  <% } %>
+</body>
+</html>

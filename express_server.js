@@ -63,28 +63,17 @@ app.get("/urls.json", (req, res) => {
 
 //show the list of URLs with their shortened forms
 app.get("/urls", (req, res) => {
+  var userCookie = req.cookies["user_ID"];
+  console.log("getting userid: ", users[userCookie]);
   let templateVars = {
-    username: req.cookies["username"],
+    user: users[userCookie],
     urlDatabase: urlDatabase
   }
   // console.log(userLoggedIn.username)
   res.render("urls_index", templateVars);
 });
 
-// //show the list of URLs with their shortened forms
-// app.get("/THIS_IS_NOT_REAL/urls", (req, res) => {
-//   var user = {
-//     name: "idiot",
-//     profile_pic: "http://pics.com/mypic.jpg"
-//   }
-//   // TODO: set user to the right user, somehow
 
-//   // console.log(userLoggedIn.username)
-//   res.render("urls_index", {
-//     urlDatabase: urlDatabase,
-//     userLoggedIn: user
-//   });
-// });
 
 
 //Generate a Random ShortURL
@@ -101,8 +90,9 @@ function generateRandomString() {
 
 //show /urls/new page
 app.get("/urls/new", (req, res) => {
+  var userCookie = req.cookies["user_ID"];
   let templateVars = {
-    username: req.cookies["username"]
+    user: users[userCookie]
   }
   res.render("urls_new", templateVars);
 });
@@ -141,26 +131,52 @@ app.post("/urls/:shortURL/update", (req, res) => {
 })
 
 
+
+//create login page
+app.get("/login", (req, res) => {
+  var userCookie = req.cookies["user_ID"];
+  let templateVars = {
+    user: users[userCookie],
+  }
+  res.render("urls_login", templateVars);
+})
+
+
 //handling login submissions
 app.post("/login", (req, res) => {
-  var userNameSubmitted = req.body.username;
-  // testing the submitted username:
-  // console.log("username should be hannah: ", userNameSubmitted)
-  res.cookie('username', userNameSubmitted);
-  res.redirect("/urls");
+  var userEmail = req.body.email;
+  var userPassword = req.body.password;
+  // console.log("useremail: ", userEmailSubmitted);
+  // console.log("password: ", userPasswordSubmitted)
+  if (!userEmail || !userPassword) {
+    res.status(400).send("Please enter email and password!")
+  }
+  for (var user in users) {
+    if (users[user].email === userEmail) {
+      if (users[user].password === userPassword) {
+        var ID = users[user].id;
+        res.cookie("user_ID", ID)
+        res.redirect("/")
+      } else {
+        res.status(400).send("Either your email address or password seems to be wrong! Try again.")
+      }
+    }
+  }
+   res.status(400).send("Either your email address or password seems to be wrong! Try again.")
 })
 
 // when user logs out, redirect to /urls
 app.post("/logout", (req, res) => {
-  res.clearCookie("username", {path: "/"});
+  res.clearCookie("user_ID", {path: "/"});
   res.redirect("/urls");
 })
 
 
 //user registration page
 app.get("/register", (req, res) => {
+  var userCookie = req.cookies["user_ID"];
   let templateVars = {
-    username: req.cookies["username"]
+    user: users[userCookie]
   };
   res.render("urls_register", templateVars);
 })
@@ -169,13 +185,21 @@ app.post("/register", (req, res) => {
   const newID = generateRandomString();
   const newEmail = req.body.email;
   const newPassword = req.body.password;
-  var newIDSet = {};
-  newIDSet.id = newID;
-  newIDSet.email = newEmail;
-  newIDSet.password = newPassword;
-  users[newID] = newIDSet;
+  users[newID] = {
+    id: newID,
+    email: newEmail,
+    password: newPassword
+  };
+  if (!newEmail || !newPassword) {
+    res.status(400).send("Please enter your email address and password!")
+  }
+  for (const user in users) {
+    if (newEmail === users[user].email) {
+      res.status(400).send("This email already exists! Please log in.")
+    }
+  }
   // testing the users database
-  // console.log(users);
+  // console.log("users database now is: ", users);
   res.cookie("user_ID", newID)
   // testing newEmail - getting back the string
   // console.log("newIDSet should return an object", newIDSet);
@@ -186,11 +210,11 @@ app.post("/register", (req, res) => {
 
 
 
-
 //redirect short URL to actual, long URL site
 app.get("/u/:shortURL", (req, res) => {
+  var userCookie = req.cookies["user_ID"];
   let templateVars = {
-    username: req.cookies["username"],
+    user: users[userCookie],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[shortURL]
   }
@@ -201,8 +225,9 @@ app.get("/u/:shortURL", (req, res) => {
 
 //show the individual URL (individual page)
 app.get("/urls/:id", (req, res) => {
+  var userCookie = req.cookies["user_ID"];
   let templateVars = {
-    username: req.cookies["username"],
+    user: users[userCookie],
     shortURL: req.params.id,
     longURL: urlDatabase[shortURL]
   }
