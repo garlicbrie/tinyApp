@@ -63,15 +63,12 @@ app.get("/urls.json", (req, res) => {
 
 //show the list of URLs with their shortened forms
 app.get("/urls", (req, res) => {
-  let userLoggedIn = {
+  let templateVars = {
     username: req.cookies["username"],
     urlDatabase: urlDatabase
   }
   // console.log(userLoggedIn.username)
-  res.render("urls_index", {
-    urlDatabase: urlDatabase,
-    userLoggedIn: userLoggedIn
-  });
+  res.render("urls_index", templateVars);
 });
 
 // //show the list of URLs with their shortened forms
@@ -104,12 +101,10 @@ function generateRandomString() {
 
 //show /urls/new page
 app.get("/urls/new", (req, res) => {
-  let userLoggedIn = {
+  let templateVars = {
     username: req.cookies["username"]
   }
-  res.render("urls_new", {
-    userLoggedIn: userLoggedIn
-  });
+  res.render("urls_new", templateVars);
 });
 
 
@@ -164,12 +159,10 @@ app.post("/logout", (req, res) => {
 
 //user registration page
 app.get("/register", (req, res) => {
-  let userLoggedIn = {
+  let templateVars = {
     username: req.cookies["username"]
   };
-  res.render("urls_register", {
-    userLoggedIn: userLoggedIn
-  })
+  res.render("urls_register", templateVars);
 })
 
 app.post("/register", (req, res) => {
@@ -196,30 +189,26 @@ app.post("/register", (req, res) => {
 
 //redirect short URL to actual, long URL site
 app.get("/u/:shortURL", (req, res) => {
-  let userLoggedIn = {
-    username: req.cookies["username"]
+  let templateVars = {
+    username: req.cookies["username"],
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[shortURL]
   }
-  var shortURL = req.params.shortURL;
-  let longURL  = urlDatabase[shortURL]
-  res.redirect(longURL, {
-    userLoggedIn: userLoggedIn
-  });
+  res.redirect(longURL, templateVars);
 });
 
 
 
 //show the individual URL (individual page)
 app.get("/urls/:id", (req, res) => {
-  let userLoggedIn = {
-    username: req.cookies["username"]
+  let templateVars = {
+    username: req.cookies["username"],
+    shortURL: req.params.id,
+    longURL: urlDatabase[shortURL]
   }
   var shortURL = req.params.id;
   var longURL = urlDatabase[shortURL];
-  res.render("urls_show", {
-    shortURL: shortURL,
-    longURL: longURL,
-    userLoggedIn: userLoggedIn
-  });
+  res.render("urls_show", templateVars);
 });
 
 
