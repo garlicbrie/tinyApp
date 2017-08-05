@@ -140,6 +140,7 @@ app.post("/urls", (req, res) => {
 //delete URLs
 app.post("/urls/:shortURL/delete", (req, res) => {
   var selectedShortURL = req.params.shortURL;
+
   // testing whhat selectedShortURL is returning is
   // console.log("selectedShortURL: ", selectedShortURL);
   delete urlDatabase[selectedShortURL];
@@ -151,7 +152,15 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 //update URLs
 app.post("/urls/:shortURL/update", (req, res) => {
   var shortURL = req.params.shortURL;
-  var newlongURL = req.body["newLongURL"]
+  var newlongURL = req.body["newLongURL"];
+  var userCookie = req.cookies["user_ID"];
+  for (var shortURL in urlDatabase) {
+    if (userCookie !== urlDatabase[shortURL]["user_ID"]) {
+      res.status(400).send("This is not your URL to delete!")
+      return
+    }
+  }
+
   // testing new URL inputs
   // console.log("this should be hello", newlongURL);
   // console.log("this should be lighthouse: ", urlDatabase[shortURL]);
@@ -192,6 +201,9 @@ app.post("/login", (req, res) => {
   }
   res.status(400).send("Either your email address or password seems to be wrong! Try again.");
   })
+
+
+
 
 // when user logs out, redirect to /urls
 app.post("/logout", (req, res) => {
