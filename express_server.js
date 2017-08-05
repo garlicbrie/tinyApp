@@ -12,6 +12,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 var cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+
 //database
 var urlDatabase = {
   "b2xVn2": {"longURL": "http://www.lighthouselabs.ca",
