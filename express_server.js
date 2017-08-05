@@ -156,7 +156,7 @@ app.post("/urls/:shortURL/update", (req, res) => {
   var userCookie = req.cookies["user_ID"];
   for (var shortURL in urlDatabase) {
     if (userCookie !== urlDatabase[shortURL]["user_ID"]) {
-      res.status(400).send("This is not your URL to delete!")
+      res.status(400).send("This is not your URL to update!")
       return
     }
   }
