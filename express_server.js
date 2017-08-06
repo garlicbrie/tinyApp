@@ -12,6 +12,16 @@ app.use(bodyParser.urlencoded({extended: true}));
 var cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+//replaceing cookie parser middleware with cookie session
+// var cookieSession = require('cookie-session');
+// app.use(cookieSession({
+//   name: 'session',
+//   keys: [/* secret keys */]
+// }));
+
+//requiring bcrypt for securing database
+const bcrypt = require('bcrypt');
+
 
 //database
 var urlDatabase = {
@@ -33,16 +43,6 @@ var users = {
     id: "grace",
     email: "grace@grace.com",
     password: "grace"
-  },
-  "jenna": {
-    id: "jenna",
-    email: "jenna@jenna.com",
-    password: "jenna"
-  },
-  "lisa": {
-    id: "lisa",
-    email: "lisa@lisa.com",
-    password: "lisa"
   }
 }
 
@@ -171,6 +171,53 @@ app.post("/urls/:shortURL/update", (req, res) => {
 
 
 
+
+//user registration page
+app.get("/register", (req, res) => {
+  var userCookie = req.cookies["user_ID"];
+  let templateVars = {
+    user: users[userCookie]
+  };
+  res.render("urls_register", templateVars);
+})
+
+app.post("/register", (req, res) => {
+  const newID = generateRandomString();
+  const newEmail = req.body.email;
+
+  const newPassword = req.body.password;
+  const hashed_newPassword = bcrypt.hashSync(newPassword, 10);
+
+  if (!newEmail || !newPassword) {
+    res.status(400).send("Please enter your email address and password!")
+    return
+  };
+
+  for (const user in users) {
+    if (newEmail === users[user].email) {
+      res.status(400).send("This email already exists! Please log in.")
+      return
+    }
+  };
+
+    users[newID] = {
+    id: newID,
+    email: newEmail,
+    password: hashed_newPassword
+  };
+
+  // testing to see new users database with newly registered user
+  console.log("users: ", users);
+
+  res.cookie("user_ID", newID)
+  // testing newEmail - getting back the string
+  // console.log("newIDSet should return an object", newIDSet);
+  res.redirect("/urls");
+})
+
+
+
+
 //create login page
 app.get("/login", (req, res) => {
   var userCookie = req.cookies["user_ID"];
@@ -193,7 +240,7 @@ app.post("/login", (req, res) => {
   }
   for (var user in users) {
     // console.log(users[user]);
-    if (users[user].email === userEmail && users[user].password === userPassword) {
+    if (users[user].email === userEmail && bcrypt.compareSync(userPassword, users[user]["password"])) {
         var ID = users[user].id;
         res.cookie("user_ID", ID)
         res.redirect("/")
@@ -212,42 +259,6 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 })
 
-
-//user registration page
-app.get("/register", (req, res) => {
-  var userCookie = req.cookies["user_ID"];
-  let templateVars = {
-    user: users[userCookie]
-  };
-  res.render("urls_register", templateVars);
-})
-
-app.post("/register", (req, res) => {
-  const newID = generateRandomString();
-  const newEmail = req.body.email;
-  const newPassword = req.body.password;
-  users[newID] = {
-    id: newID,
-    email: newEmail,
-    password: newPassword
-  };
-  if (!newEmail || !newPassword) {
-    res.status(400).send("Please enter your email address and password!")
-    return
-  }
-  for (const user in users) {
-    if (newEmail === users[user].email) {
-      res.status(400).send("This email already exists! Please log in.")
-      return
-    }
-  }
-  // testing the users database
-  // console.log("users database now is: ", users);
-  res.cookie("user_ID", newID)
-  // testing newEmail - getting back the string
-  // console.log("newIDSet should return an object", newIDSet);
-  res.redirect("/urls");
-})
 
 
 
