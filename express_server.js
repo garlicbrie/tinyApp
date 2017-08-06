@@ -226,7 +226,7 @@ app.post("/register", (req, res) => {
 app.get("/login", (req, res) => {
   var userCookie = req.cookies["user_ID"];
   let templateVars = {
-    user: users[userCookie],
+    user: userCookie,
   }
   res.render("urls_login", templateVars);
 })
