@@ -16,7 +16,7 @@ app.use(cookieParser());
 // var cookieSession = require('cookie-session');
 // app.use(cookieSession({
 //   name: 'session',
-//   keys: [/* secret keys */]
+//   keys: 'itsSuperSecret'
 // }));
 
 //requiring bcrypt for securing database
@@ -91,7 +91,6 @@ app.get("/urls", (req, res) => {
 
   // console.log("getting userCookie: ", userCookie);
   let templateVars = {
-    user: users[userCookie],
     urlDatabase: urlDatabase,
     userSpecificURLs: userSpecificURLs
   }
@@ -132,7 +131,12 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   const newURL = req.body.longURL;
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = newURL;
+  urlDatabase[shortURL] = {
+    longURL: newURL,
+    user_ID: req.cookies["user_ID"]
+  }
+
+  // urlDatabase[shortURL] = newURL;
   console.log("urlDatabase: ", urlDatabase);  // debug statement to see POST parameters
   res.redirect("/urls/" + shortURL);         // redirecting to the page where it shows the individual URL results
 });
@@ -280,13 +284,13 @@ app.get("/u/:shortURL", (req, res) => {
 //show the individual URL (individual page)
 app.get("/urls/:id", (req, res) => {
   var userCookie = req.cookies["user_ID"];
+  var shortURL = req.params.id;
+  var longURL = urlDatabase[shortURL]["longURL"];
   let templateVars = {
     user: users[userCookie],
     shortURL: req.params.id,
-    longURL: urlDatabase[shortURL]
-  }
-  var shortURL = req.params.id;
-  var longURL = urlDatabase[shortURL];
+    longURL: urlDatabase[shortURL]["longURL"]
+  };
   res.render("urls_show", templateVars);
 });
 
