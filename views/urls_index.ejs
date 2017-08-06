@@ -8,6 +8,8 @@
   <% include ./partials/_header %>
   </header>
 
+  <h3>logged in as: <%= user %></h3>
+
   <table>
   <% Object.keys(userSpecificURLs).forEach(function(shortURL) { %>
     <tr>

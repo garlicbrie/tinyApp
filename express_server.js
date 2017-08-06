@@ -69,6 +69,7 @@ app.get("/urls.json", (req, res) => {
 //show the list of URLs with their shortened forms
 app.get("/urls", (req, res) => {
   var userCookie = req.cookies["user_ID"];
+  var email = users[userCookie]["email"];
 
   //filtering function that returns a list of urls (object) for specific id
   function urlsForUser(id) {
@@ -92,7 +93,8 @@ app.get("/urls", (req, res) => {
   // console.log("getting userCookie: ", userCookie);
   let templateVars = {
     urlDatabase: urlDatabase,
-    userSpecificURLs: userSpecificURLs
+    userSpecificURLs: userSpecificURLs,
+    user: email
   }
   // console.log(userLoggedIn.username)
   res.render("urls_index", templateVars);
@@ -225,8 +227,10 @@ app.post("/register", (req, res) => {
 //create login page
 app.get("/login", (req, res) => {
   var userCookie = req.cookies["user_ID"];
+  var email = users[userCookie]["email"];
+
   let templateVars = {
-    user: userCookie,
+    user: email,
   }
   res.render("urls_login", templateVars);
 })
