@@ -23,7 +23,6 @@ app.use(cookieParser());
 const bcrypt = require('bcrypt');
 
 
-//database
 var urlDatabase = {
   "b2xVn2": {"longURL": "http://www.lighthouselabs.ca",
              "user_ID": "hannah"},
@@ -44,8 +43,7 @@ var users = {
     email: "grace@grace.com",
     password: "grace"
   }
-}
-
+};
 
 
 //handling get request
@@ -63,9 +61,6 @@ app.get("/urls.json", (req, res) => {
 });
 
 
-
-
-
 //show the list of URLs with their shortened forms
 app.get("/urls", (req, res) => {
   var userCookie = req.cookies["user_ID"];
@@ -77,20 +72,17 @@ app.get("/urls", (req, res) => {
     var userSpecificURLs;
     for (var shortURL in urlDatabase) {
       if (urlDatabase[shortURL]["user_ID"] === id) {
-        urls[shortURL] = urlDatabase[shortURL]
+        urls[shortURL] = urlDatabase[shortURL];
       }
     }
-    return urls
-  }
-
+    return urls;
+  };
   if (!userCookie) {
-    res.status(400).send("Please log in first to view your shortend URLs!")
+    res.status(400).send("Please log in first to view your shortend URLs!");
     return
   } else {
     userSpecificURLs = urlsForUser(userCookie);
-  }
-
-  // console.log("getting userCookie: ", userCookie);
+  };
   let templateVars = {
     urlDatabase: urlDatabase,
     userSpecificURLs: userSpecificURLs,
@@ -99,8 +91,6 @@ app.get("/urls", (req, res) => {
   // console.log(userLoggedIn.username)
   res.render("urls_index", templateVars);
 });
-
-
 
 
 //Generate a Random ShortURL
@@ -112,7 +102,7 @@ function generateRandomString() {
     result += possible.charAt(Math.floor(Math.random() * possible.length));
 
   return result;
-}
+};
 
 
 //show /urls/new page
@@ -122,7 +112,7 @@ app.get("/urls/new", (req, res) => {
     user: users[userCookie]
   };
   if (!userCookie) {
-    res.redirect("/login")
+    res.redirect("/login");
     return
   }
   res.render("urls_new", templateVars);
@@ -153,7 +143,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[selectedShortURL];
 
   res.redirect("/urls");
-})
+});
 
 
 //update URLs
@@ -163,7 +153,7 @@ app.post("/urls/:shortURL/update", (req, res) => {
   var userCookie = req.cookies["user_ID"];
   for (var shortURL in urlDatabase) {
     if (userCookie !== urlDatabase[shortURL]["user_ID"]) {
-      res.status(400).send("This is not your URL to update!")
+      res.status(400).send("This is not your URL to update!");
       return
     }
   }
@@ -173,9 +163,7 @@ app.post("/urls/:shortURL/update", (req, res) => {
   // console.log("this should be lighthouse: ", urlDatabase[shortURL]);
   urlDatabase[shortURL] = newlongURL;
   res.redirect("/urls");
-})
-
-
+});
 
 
 //user registration page
@@ -185,7 +173,7 @@ app.get("/register", (req, res) => {
     user: users[userCookie]
   };
   res.render("urls_register", templateVars);
-})
+});
 
 app.post("/register", (req, res) => {
   const newID = generateRandomString();
@@ -195,17 +183,17 @@ app.post("/register", (req, res) => {
   const hashed_newPassword = bcrypt.hashSync(newPassword, 10);
 
   if (!newEmail || !newPassword) {
-    res.status(400).send("Please enter your email address and password!")
+    res.status(400).send("Please enter your email address and password!");
     return
   };
 
   for (const user in users) {
     if (newEmail === users[user].email) {
-      res.status(400).send("This email already exists! Please log in.")
+      res.status(400).send("This email already exists! Please log in.");
       return
     }
   };
-
+  // Putting new user to the database
     users[newID] = {
     id: newID,
     email: newEmail,
@@ -215,61 +203,49 @@ app.post("/register", (req, res) => {
   // testing to see new users database with newly registered user
   console.log("users: ", users);
 
-  res.cookie("user_ID", newID)
+  res.cookie("user_ID", newID);
   // testing newEmail - getting back the string
   // console.log("newIDSet should return an object", newIDSet);
   res.redirect("/urls");
-})
-
-
+});
 
 
 //create login page
 app.get("/login", (req, res) => {
   var userCookie = req.cookies["user_ID"];
   var email = users[userCookie]["email"];
-
   let templateVars = {
-    user: email,
+    user: email
   }
   res.render("urls_login", templateVars);
-})
+});
 
 
 //handling login submissions
 app.post("/login", (req, res) => {
   var userEmail = req.body.email;
   var userPassword = req.body.password;
-  // console.log("useremail: ", userEmail);
-  // console.log("password: ", userPassword);
   if (!userEmail || !userPassword) {
     res.status(400).send("Please enter email and password!")
     return
   }
   for (var user in users) {
-    // console.log(users[user]);
     if (users[user].email === userEmail && bcrypt.compareSync(userPassword, users[user]["password"])) {
         var ID = users[user].id;
-        res.cookie("user_ID", ID)
-        res.redirect("/")
+        res.cookie("user_ID", ID);
+        res.redirect("/");
         return
     }
   }
   res.status(400).send("Either your email address or password seems to be wrong! Try again.");
-  })
-
-
+  });
 
 
 // when user logs out, redirect to /urls
 app.post("/logout", (req, res) => {
   res.clearCookie("user_ID", {path: "/"});
   res.redirect("/urls");
-})
-
-
-
-
+});
 
 
 //redirect short URL to actual, long URL site
@@ -284,7 +260,6 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 
-
 //show the individual URL (individual page)
 app.get("/urls/:id", (req, res) => {
   var userCookie = req.cookies["user_ID"];
@@ -297,7 +272,6 @@ app.get("/urls/:id", (req, res) => {
   };
   res.render("urls_show", templateVars);
 });
-
 
 
 //server console msg
