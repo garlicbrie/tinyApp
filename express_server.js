@@ -8,16 +8,12 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
-//accessing cookie parser middleware and allowing to save cookie
-var cookieParser = require('cookie-parser');
-app.use(cookieParser());
-
 //replaceing cookie parser middleware with cookie session
-// var cookieSession = require('cookie-session');
-// app.use(cookieSession({
-//   name: 'session',
-//   keys: 'itsSuperSecret'
-// }));
+var cookieSession = require('cookie-session');
+app.use(cookieSession({
+  name: 'session',
+  keys: ['itsSuperSecret']
+}));
 
 //requiring bcrypt for securing database
 const bcrypt = require('bcrypt');
@@ -63,8 +59,10 @@ app.get("/urls.json", (req, res) => {
 
 //show the list of URLs with their shortened forms
 app.get("/urls", (req, res) => {
-  var userCookie = req.cookies["user_ID"];
-  var email = users[userCookie]["email"];
+  var userCookie = req.session.user_id;
+  console.log("get urls usercookie: ", userCookie);
+  // var email = users[userCookie]["email"];
+  // console.log("email: ", email);
 
   //filtering function that returns a list of urls (object) for specific id
   function urlsForUser(id) {
@@ -86,7 +84,7 @@ app.get("/urls", (req, res) => {
   let templateVars = {
     urlDatabase: urlDatabase,
     userSpecificURLs: userSpecificURLs,
-    user: email
+    user: users[userCookie]["email"]
   }
   // console.log(userLoggedIn.username)
   res.render("urls_index", templateVars);
@@ -107,7 +105,7 @@ function generateRandomString() {
 
 //show /urls/new page
 app.get("/urls/new", (req, res) => {
-  var userCookie = req.cookies["user_ID"];
+  var userCookie = req.session.user_id;
   let templateVars = {
     user: users[userCookie]
   };
@@ -125,7 +123,7 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: newURL,
-    user_ID: req.cookies["user_ID"]
+    user_ID: req.session.user_id
   }
 
   // urlDatabase[shortURL] = newURL;
@@ -150,7 +148,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:shortURL/update", (req, res) => {
   var shortURL = req.params.shortURL;
   var newlongURL = req.body["newLongURL"];
-  var userCookie = req.cookies["user_ID"];
+  var userCookie = req.session.user_id;
   for (var shortURL in urlDatabase) {
     if (userCookie !== urlDatabase[shortURL]["user_ID"]) {
       res.status(400).send("This is not your URL to update!");
@@ -168,9 +166,8 @@ app.post("/urls/:shortURL/update", (req, res) => {
 
 //user registration page
 app.get("/register", (req, res) => {
-  var userCookie = req.cookies["user_ID"];
   let templateVars = {
-    user: users[userCookie]
+    user: req.session.user_id
   };
   res.render("urls_register", templateVars);
 });
@@ -203,7 +200,10 @@ app.post("/register", (req, res) => {
   // testing to see new users database with newly registered user
   console.log("users: ", users);
 
-  res.cookie("user_ID", newID);
+  req.session.user_id = newID;
+  // console.log(req.session.user_id);
+
+  // res.cookie("user_ID", newID);
   // testing newEmail - getting back the string
   // console.log("newIDSet should return an object", newIDSet);
   res.redirect("/urls");
@@ -212,7 +212,7 @@ app.post("/register", (req, res) => {
 
 //create login page
 app.get("/login", (req, res) => {
-  var userCookie = req.cookies["user_ID"];
+  var userCookie = req.session.user_id;
   var email = users[userCookie]["email"];
   let templateVars = {
     user: email
@@ -232,7 +232,7 @@ app.post("/login", (req, res) => {
   for (var user in users) {
     if (users[user].email === userEmail && bcrypt.compareSync(userPassword, users[user]["password"])) {
         var ID = users[user].id;
-        res.cookie("user_ID", ID);
+        req.session.user_id = ID;
         res.redirect("/");
         return
     }
@@ -243,14 +243,14 @@ app.post("/login", (req, res) => {
 
 // when user logs out, redirect to /urls
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_ID", {path: "/"});
+  req.session = null;
   res.redirect("/urls");
 });
 
 
 //redirect short URL to actual, long URL site
 app.get("/u/:shortURL", (req, res) => {
-  var userCookie = req.cookies["user_ID"];
+  var userCookie = req.session.user_id;
   let templateVars = {
     user: users[userCookie],
     shortURL: req.params.shortURL,
@@ -262,7 +262,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 //show the individual URL (individual page)
 app.get("/urls/:id", (req, res) => {
-  var userCookie = req.cookies["user_ID"];
+  var userCookie = req.session.user_id;
   var shortURL = req.params.id;
   var longURL = urlDatabase[shortURL]["longURL"];
   let templateVars = {
