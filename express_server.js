@@ -122,7 +122,7 @@ app.post("/urls/:shortURL", (req, res) => {
   const userCookie = req.session.user_id;
 
   if (userCookie !== urlDatabase[shortURL]["user_id"]) {
-    res.status(400).send("This is not your URL to update!");
+    res.status(401).send("This is not your URL to update!");
     return;
   } else {
     urlDatabase[shortURL]["longURL"] = newlongURL;
@@ -177,13 +177,13 @@ app.post("/register", (req, res) => {
   const hashed_newPassword = bcrypt.hashSync(newPassword, 10);
 
   if (!newEmail || !newPassword) {
-    res.status(400).send("Please enter your email address and password!");
+    res.status(401).send("Please enter your email address and password!");
     return;
   }
 
   for (const user in users) {
     if (newEmail === users[user].email) {
-      res.status(400).send("This email already exists! Please log in.");
+      res.status(401).send("This email already exists! Please log in.");
       return;
     }
   }
@@ -229,7 +229,7 @@ app.post("/login", (req, res) => {
       return;
     }
   }
-  res.status(400).send("Either your email address or password seems to be wrong! Try again.");
+  res.status(401).send("Either your email address or password seems to be wrong! Try again.");
 });
 
 
