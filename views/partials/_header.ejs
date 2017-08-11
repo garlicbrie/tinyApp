@@ -1,5 +1,12 @@
 
 <header>
-  <a href="/register"> register </a> &nbsp;
-  <a href="/login"> log in </a>
+  <% if (!user) { %>
+    <a href="/login"> Login </a> &nbsp;&nbsp;
+    <a href="/register"> Register </a>
+  <% } else{ %>
+    <h4> Logged In: <%= user %>
+    <form method="POST" action="/logout">
+      <button> logout </button>
+    </form> </h4>
+  <% } %>
 </header>

@@ -8,7 +8,6 @@
   <% include ./partials/_header %>
   </header>
 
-  <h3>logged in as: <%= user %></h3>
 
   <table>
   <% Object.keys(userSpecificURLs).forEach(function(shortURL) { %>
@@ -17,12 +16,13 @@
       <td> <%= userSpecificURLs[shortURL]["longURL"] %> </td>
       <td> <form method="POST" action="/urls/<%= shortURL %>/delete"> <button> delete </button> </form>
       </td>
+      <td> <form method="GET" action="urls/<%= shortURL %>"> <button> edit </button></form></td>
     </tr>
   <% }) %>
   </table>
 
 
-  <a href='/urls/new'> add urls! </a>
+  <a href='/urls/new'> Create a New Short Link! </a>
 
 </body>
 </html>
