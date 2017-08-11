@@ -1,23 +1,16 @@
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 8080; // default port 8080
+const bodyParser = require("body-parser");
+const cookieSession = require('cookie-session');
+const bcrypt = require('bcrypt');
 
 app.set("view engine", "ejs");
-
-//accessing bodyparser middleware and allowing the POST request
-const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-
-//replaceing cookie parser middleware with cookie session
-const cookieSession = require('cookie-session');
 app.use(cookieSession({
   name: 'session',
   keys: ['itsSuperSecret']
 }));
-
-//requiring bcrypt for securing database
-const bcrypt = require('bcrypt');
-
 
 const urlDatabase = {
   "b2xVn2": {"longURL": "http://www.lighthouselabs.ca",
@@ -42,11 +35,22 @@ const users = {
 };
 
 
+//Generate a Random ShortURL
+function generateRandomString() {
+  var result = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for (var i = 0; i < 6; i++)
+    result += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return result;
+};
+
+
 //handling get request
 app.get("/", (req, res) => {
   res.render("url_landing");
 });
-
 
 
 //show the jSON version of urlDatabase
@@ -54,11 +58,9 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-
 //show the list of URLs with their shortened forms
 app.get("/urls", (req, res) => {
   const userCookie = req.session.user_id;
-
 
   //filtering function that returns a list of urls (object) for specific id
   function urlsForUser(id) {
@@ -86,16 +88,6 @@ app.get("/urls", (req, res) => {
 });
 
 
-//Generate a Random ShortURL
-function generateRandomString() {
-  var result = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-  for (var i = 0; i < 6; i++)
-    result += possible.charAt(Math.floor(Math.random() * possible.length));
-
-  return result;
-};
 
 
 //show /urls/new page
@@ -113,6 +105,8 @@ app.get("/urls/new", (req, res) => {
 });
 
 
+
+
 //add new URLs
 app.post("/urls", (req, res) => {
   const userCookie = req.session.user_id;
@@ -128,6 +122,8 @@ app.post("/urls", (req, res) => {
     res.redirect("/urls/" + shortURL);
   }
 });
+
+
 
 
 //delete URLs
