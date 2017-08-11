@@ -149,13 +149,8 @@ app.get("/urls/:id", (req, res) => {
     };
     res.render("urls_show", templateVars);
   } else {
-    let templateVars = {
-      user: user,
-      shortURL: shortURL,
-      longURL: urlDatabase[shortURL]["longURL"]
-    };
-    res.render("urls_show", templateVars);
-  }
+      res.status(401).send("Please log in to view this page!");
+    }
 });
 
 
